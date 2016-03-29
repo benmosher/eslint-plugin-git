@@ -1,0 +1,30 @@
+{
+  "name": "eslint-plugin-git",
+  "version": "0.0.0",
+  "description": "Git with sanity.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benmosher/eslint-plugin-git.git"
+  },
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "git"
+  ],
+  "author": "Ben Mosher <me@benmosher.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/benmosher/eslint-plugin-git/issues"
+  },
+  "homepage": "https://github.com/benmosher/eslint-plugin-git#readme",
+  "devDependencies": {
+    "eslint": "^2.5.3"
+  },
+  "dependencies": {
+    "eslint-module-utils": "^0.1.1"
+  }
+}
