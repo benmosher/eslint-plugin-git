@@ -4,7 +4,8 @@
   "description": "Git with sanity.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --recursive",
+    "posttest": "eslint rules index.js"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,10 @@
   },
   "homepage": "https://github.com/benmosher/eslint-plugin-git#readme",
   "devDependencies": {
-    "eslint": "^2.5.3"
+    "eslint": "^2.5.3",
+    "eslint-import-resolver-node": "^0.2.0",
+    "mocha": "^2.4.5",
+    "touch": "^1.0.0"
   },
   "dependencies": {
     "eslint-module-utils": "^0.1.1"
