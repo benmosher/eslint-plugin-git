@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "istanbul cover --dir coverage _mocha",
-    "posttest": "eslint rules index.js"
+    "posttest": "eslint rules index.js",
+    "coveralls": "cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
   },
   "homepage": "https://github.com/benmosher/eslint-plugin-git#readme",
   "devDependencies": {
+    "coveralls": "^2.11.9",
     "eslint": "^2.5.3",
     "eslint-import-resolver-node": "^0.2.0",
     "istanbul": "^0.4.2",
