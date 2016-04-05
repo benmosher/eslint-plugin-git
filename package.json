@@ -4,7 +4,7 @@
   "description": "Git with sanity.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --recursive",
+    "test": "istanbul cover --dir coverage _mocha",
     "posttest": "eslint rules index.js"
   },
   "repository": {
@@ -25,6 +25,7 @@
   "devDependencies": {
     "eslint": "^2.5.3",
     "eslint-import-resolver-node": "^0.2.0",
+    "istanbul": "^0.4.2",
     "mocha": "^2.4.5",
     "touch": "^1.0.0"
   },
