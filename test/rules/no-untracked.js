@@ -23,6 +23,8 @@ describe("main tests", function () {
     path.resolve('./test/files/untracked.js'),
   ]
 
+  const cacheTestFile = path.resolve('./test/files/cache-correctness.js')
+
   before("create untracked files", function () {
     files.forEach(f => touch.sync(f))
   })
@@ -39,8 +41,10 @@ describe("main tests", function () {
       test({ code: 'import "./ignored"' }),
       // core modules are fine
       test({ code: 'import "fs"' }),
-      // out of scope
+      // out of scope`
       test({ code: 'import "/some/root/fake/thing"' }),
+      // this doesn't exist (yet)
+      test({ code: `import "${cacheTestFile}"`}),
     ],
 
     invalid: [
@@ -49,5 +53,23 @@ describe("main tests", function () {
         errors: ['Imported module is currently untracked by Git.'],
       }),
     ],
+  })
+
+  describe("cache correctness", function () {
+
+    const testDesc = test({
+      code: `import "${cacheTestFile}"`,
+      settings: { 'import/cache': { lifetime: 1 } },
+    })
+
+    before("touch file", () => touch.sync(cacheTestFile))
+    before("wait for cache lifetime to expire", done => setTimeout(done, 1100))
+
+    after("rm file", () => fs.unlinkSync(cacheTestFile))
+
+    // actual test
+    ruleTester.run('tests', rule,
+      { valid: [], invalid: [ Object.assign({ errors: 1}, testDesc) ] })
+
   })
 })

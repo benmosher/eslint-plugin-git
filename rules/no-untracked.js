@@ -1,5 +1,6 @@
 "use strict"
 const resolve = require('eslint-module-utils/resolve').default
+    , ModuleCache = require('eslint-module-utils/ModuleCache').default
     , moduleVisitor = require('eslint-module-utils/moduleVisitor')
 
 const fs = require('fs')
@@ -15,23 +16,25 @@ const fs = require('fs')
 // note: will return a non-zero exit code for files outside the repo
 
 module.exports = function (context) {
+  const cacheSettings = ModuleCache.getSettings(context.settings)
+
   return moduleVisitor.default(function checkGitStatus(source) {
     const resolvedPath = resolve(source.value, context)
     if (!resolvedPath) return
 
-    const gitRoot = findGitRoot(path.dirname(resolvedPath))
+    const gitRoot = findGitRoot(path.dirname(resolvedPath), cacheSettings)
     if (gitRoot == null) return
 
-    const untracked = getUntracked(gitRoot)
+    const untracked = getUntracked(gitRoot, cacheSettings)
     if (untracked.has(resolvedPath)) {
       context.report(source, `Imported module is currently untracked by Git.`)
     }
   })
 }
 
-const gitRootCache = new Map()
-function findGitRoot(dirpath) {
-  let gitRoot = gitRootCache.get(dirpath)
+const gitRootCache = new ModuleCache()
+function findGitRoot(dirpath, cacheSettings) {
+  let gitRoot = gitRootCache.get(dirpath, cacheSettings)
   if (gitRoot !== undefined) return gitRoot
 
   const siblings = fs.readdirSync(dirpath)
@@ -42,7 +45,7 @@ function findGitRoot(dirpath) {
     gitRoot = null
   } else {
     // and recurse
-    gitRoot = findGitRoot(path.dirname(dirpath))
+    gitRoot = findGitRoot(path.dirname(dirpath), cacheSettings)
   }
 
   gitRootCache.set(dirpath, gitRoot)
@@ -54,9 +57,9 @@ function isRootPath(path) {
   return (path === '/')
 }
 
-const untrackedCache = new Map()
-function getUntracked(gitRoot) {
-  let untracked = untrackedCache.get(gitRoot)
+const untrackedCache = new ModuleCache()
+function getUntracked(gitRoot, cacheSettings) {
+  let untracked = untrackedCache.get(gitRoot, cacheSettings)
   if (untracked !== undefined) return untracked
 
   try {
