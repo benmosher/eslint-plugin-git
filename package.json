@@ -1,6 +1,7 @@
 {
   "name": "eslint-plugin-git",
-  "version": "0.0.0",
+  "engines": { "node": ">=4" },
+  "version": "0.1.0",
   "description": "Git with sanity.",
   "main": "index.js",
   "scripts": {
