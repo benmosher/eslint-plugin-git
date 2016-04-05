@@ -1,5 +1,5 @@
 "use strict"
-const moduleUtils = require('eslint-module-utils')
+const resolve = require('eslint-module-utils/resolve').default
     , moduleVisitor = require('eslint-module-utils/moduleVisitor')
 
 const fs = require('fs')
@@ -16,7 +16,7 @@ const fs = require('fs')
 
 module.exports = function (context) {
   return moduleVisitor.default(function checkGitStatus(source) {
-    const resolvedPath = moduleUtils.resolve(source.value, context)
+    const resolvedPath = resolve(source.value, context)
     if (!resolvedPath) return
 
     const gitRoot = findGitRoot(path.dirname(resolvedPath))
@@ -29,14 +29,24 @@ module.exports = function (context) {
   })
 }
 
-// todo: cache
+const gitRootCache = new Map()
 function findGitRoot(dirpath) {
+  let gitRoot = gitRootCache.get(dirpath)
+  if (gitRoot !== undefined) return gitRoot
+
   const siblings = fs.readdirSync(dirpath)
 
-  if (siblings.indexOf('.git') >= 0) return dirpath
+  if (siblings.indexOf('.git') >= 0) {
+    gitRoot = dirpath
+  } else if (isRootPath(dirpath)) {
+    gitRoot = null
+  } else {
+    // and recurse
+    gitRoot = findGitRoot(path.dirname(dirpath))
+  }
 
-  if (isRootPath(dirpath)) return null
-  else return findGitRoot(path.dirname(dirpath))
+  gitRootCache.set(dirpath, gitRoot)
+  return gitRoot
 }
 
 // todo: replace with a dependency
@@ -44,11 +54,21 @@ function isRootPath(path) {
   return (path === '/')
 }
 
-// todo: cache per gitRoot
+const untrackedCache = new Map()
 function getUntracked(gitRoot) {
-  // todo: handle error
-  const results = child.execSync("git status --porcelain -uall | grep '^??'", { cwd: gitRoot })
-  return new Set(results.toString('utf8').split(os.EOL).map(l => path.resolve(gitRoot, l.slice(3))))
+  let untracked = untrackedCache.get(gitRoot)
+  if (untracked !== undefined) return untracked
+
+  try {
+    const results = child.execSync("git status --porcelain -uall | grep '^??'", { cwd: gitRoot })
+    untracked = new Set(results.toString('utf8').split(os.EOL).map(l => path.resolve(gitRoot, l.slice(3))))
+  } catch (err) {
+    // no untracked
+    untracked = new Set()
+  }
+
+  untrackedCache.set(gitRoot, untracked)
+  return untracked
 }
 
 module.exports.schema = [ moduleVisitor.optionsSchema ]

@@ -17,16 +17,7 @@ function test(t) {
   }, t)
 }
 
-ruleTester.run(`no-untracked`, rule, {
-  valid: [
-    test({ code: 'import "./tracked"' }),
-    // todo: test something not under source control
-  ],
-
-  invalid: [],
-})
-
-describe('untracked', function () {
+describe("main tests", function () {
   const files = [
     path.resolve('./test/files/ignored.js'),
     path.resolve('./test/files/untracked.js'),
@@ -40,10 +31,16 @@ describe('untracked', function () {
     files.forEach(f => fs.unlinkSync(f))
   })
 
-  ruleTester.run(`no-untracked (untracked files)`, rule, {
+  ruleTester.run(`no-untracked`, rule, {
     valid: [
-      // this is gitignore'd
+      // this exists and is tracked
+      test({ code: 'import "./tracked"' }),
+      // this exists and is gitignore'd
       test({ code: 'import "./ignored"' }),
+      // core modules are fine
+      test({ code: 'import "fs"' }),
+      // out of scope
+      test({ code: 'import "/some/root/fake/thing"' }),
     ],
 
     invalid: [
@@ -54,4 +51,3 @@ describe('untracked', function () {
     ],
   })
 })
-

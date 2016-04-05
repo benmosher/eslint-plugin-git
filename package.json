@@ -29,6 +29,6 @@
     "touch": "^1.0.0"
   },
   "dependencies": {
-    "eslint-module-utils": "^0.1.1"
+    "eslint-module-utils": "^0.2.0"
   }
 }
