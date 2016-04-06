@@ -8,13 +8,6 @@ const fs = require('fs')
     , child = require('child_process')
     , os = require('os')
 
-// todo:
-// 1. find ancestral .git folder, cache
-// 2. git status --porcelain -uall | grep '^??' (once per .git container? cache?)
-// 3. check for resolved path in untracked set for relevant repo
-//
-// note: will return a non-zero exit code for files outside the repo
-
 module.exports = function (context) {
   const cacheSettings = ModuleCache.getSettings(context.settings)
 
@@ -22,7 +15,7 @@ module.exports = function (context) {
     const resolvedPath = resolve(source.value, context)
     if (!resolvedPath) return
 
-    const gitRoot = findGitRoot(path.dirname(resolvedPath), cacheSettings)
+    const gitRoot = findGitRoot(resolvedPath, cacheSettings)
     if (gitRoot == null) return
 
     const untracked = getUntracked(gitRoot, cacheSettings)
@@ -33,29 +26,28 @@ module.exports = function (context) {
 }
 
 const gitRootCache = new ModuleCache()
-function findGitRoot(dirpath, cacheSettings) {
-  let gitRoot = gitRootCache.get(dirpath, cacheSettings)
+function findGitRoot(filepath, cacheSettings) {
+  const ppath = path.parse(filepath)
+
+  // base case: directory is its own root
+  if (ppath.dir === ppath.root) return null
+
+  let gitRoot = gitRootCache.get(ppath.dir, cacheSettings)
   if (gitRoot !== undefined) return gitRoot
 
-  const siblings = fs.readdirSync(dirpath)
+  const siblings = fs.readdirSync(ppath.dir)
 
   if (siblings.indexOf('.git') >= 0) {
-    gitRoot = dirpath
-  } else if (isRootPath(dirpath)) {
-    gitRoot = null
+    gitRoot = ppath.dir
   } else {
     // and recurse
-    gitRoot = findGitRoot(path.dirname(dirpath), cacheSettings)
+    gitRoot = findGitRoot(ppath.dir, cacheSettings)
   }
 
-  gitRootCache.set(dirpath, gitRoot)
+  gitRootCache.set(ppath.dir, gitRoot)
   return gitRoot
 }
 
-// todo: replace with a dependency
-function isRootPath(path) {
-  return (path === '/')
-}
 
 const untrackedCache = new ModuleCache()
 function getUntracked(gitRoot, cacheSettings) {
