@@ -63,14 +63,34 @@ describe("no-untracked", function () {
   })
 
   ruleTester.run('non-ES modules', rule, {
+
     valid: [
-      // cjs/amd ignored by default
-      test({ code: 'var u = require("./untracked")' }),
-      test({ code: 'require("./untracked")' }),
+      // amd ignored by default for sourceType === module
       test({ code: 'define(["./untracked"], function (u) {})' }),
       test({ code: 'require(["./untracked"], function (u) {})' }),
+
+      // cjs respects explicit disable
+      {
+        code: 'var u = require("./untracked")',
+        options: [{ commonjs: false }],
+        filename: path.resolve('./test/files/index.js'),
+      },
     ],
+
     invalid: [
+      // commonjs is enabled by default
+      test({ code: 'var u = require("./untracked")', errors: 1 }),
+      test({ code: 'require("./untracked")', errors: 1 }),
+      {
+        code: 'var u = require("./untracked")',
+        filename: path.resolve('./test/files/index.js'),
+        errors: 1,
+      },
+      {
+        code: 'require("./untracked")',
+        filename: path.resolve('./test/files/index.js'),
+        errors: 1,
+      },
       // cjs
       test({
         code: 'var u = require("./untracked")',
@@ -95,6 +115,7 @@ describe("no-untracked", function () {
         errors: ['Imported module is currently untracked by Git.'],
       }),
     ],
+
   })
 })
 

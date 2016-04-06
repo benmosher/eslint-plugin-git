@@ -11,6 +11,10 @@ const fs = require('fs')
 module.exports = function (context) {
   const cacheSettings = ModuleCache.getSettings(context.settings)
 
+  const options = Object.assign(
+    { esmodule: true, commonjs: true }, // defaults
+    context.options[0])
+
   return moduleVisitor.default(function checkGitStatus(source) {
     const resolvedPath = resolve(source.value, context)
     if (!resolvedPath) return
@@ -22,7 +26,7 @@ module.exports = function (context) {
     if (untracked.has(resolvedPath)) {
       context.report(source, `Imported module is currently untracked by Git.`)
     }
-  }, context.options[0])
+  }, options)
 }
 
 const gitRootCache = new ModuleCache()

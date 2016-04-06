@@ -7,6 +7,7 @@ This change log adheres to standards from [Keep a CHANGELOG](http://keepachangel
 ### Added
 - this changelog
 - support for module selection params (i.e. `{ commonjs: true }`) via rule options
+- lint CommonJS requires by default (only AMD must be enabled explicitly)
 
 ## [0.1.0] - 2016-04-05
 Born.
