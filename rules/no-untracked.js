@@ -22,7 +22,7 @@ module.exports = function (context) {
     if (untracked.has(resolvedPath)) {
       context.report(source, `Imported module is currently untracked by Git.`)
     }
-  })
+  }, context.options[0])
 }
 
 const gitRootCache = new ModuleCache()

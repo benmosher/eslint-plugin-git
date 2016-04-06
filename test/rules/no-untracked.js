@@ -19,7 +19,7 @@ function test(t) {
 
 const cacheTestFile = path.resolve('./test/files/cache-correctness.js')
 
-describe("main tests", function () {
+describe("no-untracked", function () {
   const files = [
     path.resolve('./test/files/ignored.js'),
     path.resolve('./test/files/untracked.js'),
@@ -34,7 +34,7 @@ describe("main tests", function () {
     files.forEach(f => fs.unlinkSync(f))
   })
 
-  ruleTester.run(`no-untracked`, rule, {
+  ruleTester.run(`ES modules`, rule, {
     valid: [
       // this exists and is tracked
       test({ code: 'import "./tracked"' }),
@@ -46,6 +46,12 @@ describe("main tests", function () {
       test({ code: 'import "/bin/sh"' }),
       // this doesn't exist (yet)
       test({ code: `import "${cacheTestFile}"`}),
+
+      // disabled esmodule
+      test({
+        code: 'import "./untracked"',
+        options: [{ esmodule: false }],
+      }),
     ],
 
     invalid: [
@@ -55,29 +61,63 @@ describe("main tests", function () {
       }),
     ],
   })
+
+  ruleTester.run('non-ES modules', rule, {
+    valid: [
+      // cjs/amd ignored by default
+      test({ code: 'var u = require("./untracked")' }),
+      test({ code: 'require("./untracked")' }),
+      test({ code: 'define(["./untracked"], function (u) {})' }),
+      test({ code: 'require(["./untracked"], function (u) {})' }),
+    ],
+    invalid: [
+      // cjs
+      test({
+        code: 'var u = require("./untracked")',
+        options: [{ commonjs: true }],
+        errors: ['Imported module is currently untracked by Git.'],
+      }),
+      test({
+        code: 'require("./untracked")',
+        options: [{ commonjs: true }],
+        errors: ['Imported module is currently untracked by Git.'],
+      }),
+
+      // amd
+      test({
+        code: 'define(["./untracked"], function (u) {})',
+        options: [{ amd: true }],
+        errors: ['Imported module is currently untracked by Git.'],
+      }),
+      test({
+        code: 'require(["./untracked"], function (u) {})',
+        options: [{ amd: true }],
+        errors: ['Imported module is currently untracked by Git.'],
+      }),
+    ],
+  })
 })
 
 describe("cache correctness", function () {
-
-  const testDesc = test({
-    code: `import "${cacheTestFile}"`,
-    settings: { 'import/cache': { lifetime: 1 } },
-  })
-
   before("touch file", () => touch.sync(cacheTestFile))
-  before("wait for cache lifetime to expire", done => setTimeout(done, 1100))
 
   after("rm file", () => fs.unlinkSync(cacheTestFile))
 
   // actual test
   ruleTester.run('tests', rule, {
     valid: [],
-    invalid: [ Object.assign({ errors: 1}, testDesc) ] ,
+    invalid: [
+      test({
+        code: `import "${cacheTestFile}"`,
+        settings: { 'import/cache': { lifetime: 0 } },
+        errors: 1,
+      }),
+     ],
   })
 
 })
 
-describe("no untracked files", function () {
+describe("with no untracked files in scope", function () {
   const settings = { 'import/cache': { lifetime: 0 } }
 
   ruleTester.run('tests', rule, {
