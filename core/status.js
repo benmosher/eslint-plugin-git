@@ -59,3 +59,10 @@ function isUntracked(path, stati) {
   return stati.get(path) === '??'
 }
 exports.isUntracked = isUntracked
+
+function hasUnstagedChanges(path, stati) {
+  let status = stati.get(path)
+  if (status === undefined) return false
+  return status[1] === 'M'
+}
+exports.hasUnstagedChanges = hasUnstagedChanges
