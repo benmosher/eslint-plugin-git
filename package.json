@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "istanbul cover --dir coverage _mocha",
-    "posttest": "eslint rules index.js test/rules",
+    "posttest": "eslint rules core index.js test/rules",
     "coveralls": "cat ./coverage/lcov.info | coveralls"
   },
   "repository": {

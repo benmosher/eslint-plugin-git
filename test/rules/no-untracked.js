@@ -7,15 +7,7 @@ const RuleTester = require('eslint').RuleTester
 var ruleTester = new RuleTester()
   , rule = require('../../rules/no-untracked')
 
-function test(t) {
-  return Object.assign({
-    filename: path.resolve('./test/files/index.js'),
-    parserOptions: {
-      sourceType: 'module',
-      ecmaVersion: 6,
-    },
-  }, t)
-}
+const test = require('../test').default
 
 const cacheTestFile = path.resolve('./test/files/cache-correctness.js')
 
@@ -139,25 +131,15 @@ describe("cache correctness", function () {
 })
 
 describe("with no untracked files in scope", function () {
-  const settings = { 'import/cache': { lifetime: 0 } }
 
   ruleTester.run('tests', rule, {
     valid: [
       // this exists and is tracked
-      test({
-        code: 'import "./tracked"',
-        settings,
-      }),
+      test({ code: 'import "./tracked"' }),
       // this no longer exists
-      test({
-        code: 'import "./untracked"',
-        settings,
-      }),
+      test({ code: 'import "./untracked"' }),
       // this still exists and is gitignore'd
-      test({
-        code: 'import "./ignored"',
-        settings,
-      }),
+      test({ code: 'import "./ignored"' }),
     ],
     invalid: [],
   })
