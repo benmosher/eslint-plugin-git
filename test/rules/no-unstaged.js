@@ -69,6 +69,11 @@ describe("modifying tracked file", function () {
         code: 'import "./tracked"',
         options: [{ esmodule: false }],
       }),
+      // disabled commonjs
+      test({
+        code: 'require("./tracked")',
+        options: [{ commonjs: false }],
+      }),
     ],
 
     invalid: [
@@ -77,62 +82,10 @@ describe("modifying tracked file", function () {
         code: 'import "./tracked"',
         errors: 1,
       }),
+      test({
+        code: 'require("./tracked")',
+        errors: 1,
+      }),
     ],
   })
 })
-
-//   ruleTester.run('non-ES modules', rule, {
-
-//     valid: [
-//       // amd ignored by default for sourceType === module
-//       test({ code: 'define(["./untracked"], function (u) {})' }),
-//       test({ code: 'require(["./untracked"], function (u) {})' }),
-
-//       // cjs respects explicit disable
-//       {
-//         code: 'var u = require("./untracked")',
-//         options: [{ commonjs: false }],
-//         filename: path.resolve('./test/files/index.js'),
-//       },
-//     ],
-
-//     invalid: [
-//       // commonjs is enabled by default
-//       test({ code: 'var u = require("./untracked")', errors: 1 }),
-//       test({ code: 'require("./untracked")', errors: 1 }),
-//       {
-//         code: 'var u = require("./untracked")',
-//         filename: path.resolve('./test/files/index.js'),
-//         errors: 1,
-//       },
-//       {
-//         code: 'require("./untracked")',
-//         filename: path.resolve('./test/files/index.js'),
-//         errors: 1,
-//       },
-//       // cjs
-//       test({
-//         code: 'var u = require("./untracked")',
-//         options: [{ commonjs: true }],
-//         errors: ['Imported module is currently untracked by Git.'],
-//       }),
-//       test({
-//         code: 'require("./untracked")',
-//         options: [{ commonjs: true }],
-//         errors: ['Imported module is currently untracked by Git.'],
-//       }),
-
-//       // amd
-//       test({
-//         code: 'define(["./untracked"], function (u) {})',
-//         options: [{ amd: true }],
-//         errors: ['Imported module is currently untracked by Git.'],
-//       }),
-//       test({
-//         code: 'require(["./untracked"], function (u) {})',
-//         options: [{ amd: true }],
-//         errors: ['Imported module is currently untracked by Git.'],
-//       }),
-//     ],
-
-//   })

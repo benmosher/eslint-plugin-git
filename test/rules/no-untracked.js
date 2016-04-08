@@ -4,8 +4,8 @@ const path = require('path')
 
 const RuleTester = require('eslint').RuleTester
 
-var ruleTester = new RuleTester()
-  , rule = require('../../rules/no-untracked')
+const ruleTester = new RuleTester()
+    , rule = require('../../rules/no-untracked')
 
 const test = require('../test').default
 
