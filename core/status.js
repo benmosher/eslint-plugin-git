@@ -37,18 +37,13 @@ function getFileStatuses(gitRoot, cacheSettings) {
   let stati = statiCache.get(gitRoot, cacheSettings)
   if (stati !== undefined) return stati
 
-  try {
-    const results = child.execSync("git status --porcelain -uall", { cwd: gitRoot })
+  const results = child.execSync("git status --porcelain -uall", { cwd: gitRoot })
 
-    stati = new Map(
-      results.toString('utf8')
-        .split(os.EOL)
-        .map(l => [path.resolve(gitRoot, l.slice(3)), l.slice(0, 2)]))
+  stati = new Map(
+    results.toString('utf8')
+      .split(os.EOL)
+      .map(l => [path.resolve(gitRoot, l.slice(3)), l.slice(0, 2)]))
 
-  } catch (err) {
-    // no untracked
-    stati = new Map()
-  }
 
   statiCache.set(gitRoot, stati)
   return stati
